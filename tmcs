@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use File::Basename;
+use Data::Dumper;
+use YAML;
+
+require LWP::UserAgent;
+
+
+if ( ! @ARGV or @ARGV > 1 ) {
+  print_usage(1);
+}
+
+my $profile = $ARGV[0];
+
+if ($profile eq "--help" ) {
+  print_usage(0);
+}
+
+if ($profile eq "--init" ) {
+  create_tmc_yml();
+}
+
+my $cf_file = "$ENV{HOME}/.tmcs.yml";
+my $cfg = config($cf_file);
+my $rc_file = "$ENV{HOME}/.tmate.conf";
+
+if ( ! $cfg->{$profile} ) {
+  die "Profile '$profile' not found in '$cf_file'\n";
+}
+
+my $out;
+
+if ( $cfg->{$profile}->{conf_url} ) {
+  $out = get_from_url($cfg->{$profile}->{conf_url});
+} else {
+  for my $i (qw/host port rsa-fingerprint dsa-fingerprint ecdsa-fingerprint/) {
+    if ( $cfg->{$profile}->{$i} ) {
+      $out .= sprintf("set -g tmate-server-%s \"%s\"\n", $i, $cfg->{$profile}->{$i});
+    }
+  }
+}
+
+
+open(CFG,'>',$rc_file) || die "Could not open '$rc_file': $!\n";
+print CFG $out;
+close CFG;
+
+sub print_usage {
+  printf("Switch fast between your tmate configurations
+
+Usage: %s <profile|--help|--init>
+
+" , [split('/',$0)]->[-1]);
+  exit $_[0];
+}
+
+sub get_from_url {
+    my $ua = LWP::UserAgent->new;
+    $ua->timeout(10);
+    $ua->env_proxy;
+
+    my $response = $ua->get($_[0]);
+
+    if ($response->is_success) {
+	return $response->decoded_content;  # or whatever
+    }
+    else {
+	die "Could not get from url '$_[0]':\n"
+	. $response->status_line."\n";
+    }
+}
+
+sub config {
+  my ($cfg) = @_;
+  open(CFG,'<',$cfg) || die "Could not open '$cfg': $!\n";
+
+  {
+    local $/;
+    my $content = <CFG>;
+    close CFG;
+    return Load($content);
+  }
+}
+sub create_tmc_yml {
+  my $yml = "$ENV{HOME}/.tmc.yml";
+  ( -f $yml ) && die "File '$yml' already exists!\n";
+  my @lines = <DATA>;
+  open(FH,">",$yml) || die "Could not open '$yml': $!";
+  map { print FH $_ } @lines;
+  close FH;
+  exit 0
+}
+__DATA__
+################################################################################
+#
+# EXAMPLE $HOME/.tmc.yml
+#
+# Use e.g.
+#
+# tmc home
+#
+# tmc io
+#
+################################################################################
+
+
+home:
+  conf_url: https://www.yourdomain.com/tmate.conf
+
+io:
+  host: ssh.tmate.io
+  port: 22
+  rsa-fingerprint: af:2d:81:c1:fe:49:70:2d:7f:09:a9:d7:4b:32:e3:be
+  ecdsa-fingerprint: c7:a1:51:36:d2:bb:35:4b:0a:1a:c0:43:97:74:ea:42
