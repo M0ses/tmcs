@@ -2,8 +2,15 @@
 
 ## Installation
 ```
-make install
+sudo make install
 ```
+
+or
+
+```
+PREFIX=$HOME make install
+```
+
 
 ## Usage
 
