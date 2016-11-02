@@ -19,11 +19,12 @@ if ($profile eq "--help" ) {
   print_usage(0);
 }
 
+my $cf_file = "$ENV{HOME}/.tmcs.yml";
+
 if ($profile eq "--init" ) {
   create_tmc_yml();
 }
 
-my $cf_file = "$ENV{HOME}/.tmcs.yml";
 my $cfg = config($cf_file);
 my $rc_file = "$ENV{HOME}/.tmate.conf";
 
@@ -85,7 +86,7 @@ sub config {
   }
 }
 sub create_tmc_yml {
-  my $yml = "$ENV{HOME}/.tmc.yml";
+  my $yml = $cf_file;
   ( -f $yml ) && die "File '$yml' already exists!\n";
   my @lines = <DATA>;
   open(FH,">",$yml) || die "Could not open '$yml': $!";
@@ -96,7 +97,7 @@ sub create_tmc_yml {
 __DATA__
 ################################################################################
 #
-# EXAMPLE $HOME/.tmc.yml
+# EXAMPLE $HOME/.tmcs.yml
 #
 # Use e.g.
 #
