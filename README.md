@@ -20,9 +20,11 @@ tmcs <profile>
 
 ## Configuration
 
-Place the following content in $HOME/.tmcs.yml and modify to your needs
+Create an initial config:
 
 ```
 # create initial config
 tmcs --init
 ```
+
+and modify $HOME/.tmcs.yml to your needs
