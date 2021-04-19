@@ -3,11 +3,7 @@
 use strict;
 use warnings;
 use File::Basename;
-use Data::Dumper;
 use YAML;
-
-require LWP::UserAgent;
-
 
 if ( ! @ARGV or @ARGV > 1 ) {
   print_usage(1);
@@ -59,6 +55,7 @@ Usage: %s <profile|--help|--init>
 }
 
 sub get_from_url {
+    require LWP::UserAgent;
     my $ua = LWP::UserAgent->new;
     $ua->timeout(10);
     $ua->env_proxy;
