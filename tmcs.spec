@@ -27,6 +27,9 @@ Source:         %{name}-%{version}.tar.xz
 #BuildRequires:  
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildArch: noarch
+Requires: perl(YAML)
+Requires: perl(File::Basename)
+Recommends: perl(LWP::UserAgent)
 
 %description
 tmcs - The tmate configuration switcher
